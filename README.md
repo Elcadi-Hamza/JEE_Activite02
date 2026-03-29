@@ -232,5 +232,63 @@ public String delete(@RequestParam(name = "id") Long id) {
 *Remarque* : tu peut faire directement `Long id` mais il est preferable de utilise `@RequestParam`
 si tu utilise des parametre dans le lien.
 ## Page template basée sur Thymeleaf layout et bootstrap
+Dans cette section on va ajouter une template.</br>
+Une page template est la partie qui ne change pas dans tout les pages de l'application, comme `header` et `footer`.</br>
+**1er :**  en ajoute la dependace de temleaf layout.
+```xml
+<dependency>
+    <groupId>nz.net.ultraq.thymeleaf</groupId>
+    <artifactId>thymeleaf-layout-dialect</artifactId>
+</dependency>
+```
+**2eme :** en créer le fichier `ressources/templates/layout1.html`. </br>
+**3eme :** on ajoute les fragments dans la page products.html
+```html
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="layout1"
+>...</html>
+<div class="p-3" layout:fragment="content1"> ... </div>
+```
+**4eme :** On ajoute la methode home dans le fichier `ProductController.java`.
+```java
+@GetMapping("/home")
+public String home() {
+    return "redirect:/index";
+}
+```
+### La saisir et l'ajoute d'un produit avec la validation du formulaire
+Dans cette section on va créer la page d'ajoute des produits.</br>
+**1er :** on ajoute la button `new product` dans la page `products.html`.
+```html
+<div class="p-3">
+    <a class="btn btn-primary" th:href="@{/newProduct}">New Product</a>
+</div>
+```
+**2eme :** On ajoutons la methode `newProduct` dans le controlleur `ProductController.java`.
+```java
+@GetMapping("/newProduct")
+public String newProduct(Model model) {
+        model.addAttribute("product", new Product());
+        return "new-product";
+}
+```
+**3eme :** On créer la page `new-product.html`.</br>
+**4eme :** On ajoute la méthode `savePoroduct` dans le controlleur `ProductController.java`.
+```java
+@GetMapping("/saveProduct")
+public String saveProduct (@Valid Product product, BindingResult bindingResult, Model model) {
+    if(bindingResult.hasErrors()) return "new-product";
+    productRepository.save(product);
+    return "redirect:/newProduct";
+}
+```
+**Remarque :** `@Valid` permet de respecter les contraintes qui déja défini dans la class Product, comme
+```java
+@NotEmpty
+@Size(min = 3, max = 50)
+```
+(`Model model` required for `@Valid` to work), et `BindingResult bindingResult` est le variable ou l'erreur va stocker.</br>
 
+## Sécuriser l'application avec Spring Security
 
