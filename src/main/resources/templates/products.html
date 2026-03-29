@@ -9,7 +9,7 @@
 <div class="p-3">
 <table class="table">
     <thead>
-    <th>ID</th><th>Name</th><th>Price</th><th>Quantity</th>
+    <th>ID</th><th>Name</th><th>Price</th><th>Quantity</th><th></th>
     </thead>
     <tbody>
     <tr th:each="p:${productList}">
@@ -17,6 +17,9 @@
         <td th:text="${p.name}"></td>
         <td th:text="${p.price}"></td>
         <td th:text="${p.quantity}"></td>
+        <td>
+            <a class="btn btn-danger" onclick="return confirm('Etes vous sure?')" th:href="@{/delete(id=${p.id})}">delete</a>
+        </td>
     </tr>
     </tbody>
 </table>
