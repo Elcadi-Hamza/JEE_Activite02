@@ -291,4 +291,45 @@ public String saveProduct (@Valid Product product, BindingResult bindingResult, 
 (`Model model` required for `@Valid` to work), et `BindingResult bindingResult` est le variable ou l'erreur va stocker.</br>
 
 ## Sécuriser l'application avec Spring Security
+Spring sécurité besoin des dépendance dans le fichier `pom.xml`.</br>
+**1er :** On activer le spring sécurité. on suppremer le ligne qu'on a ajoute dans les premier parties dans le fichier
+`GlsidEnsetSpringMvcApplication.java`.
+```java
+//@SpringBootApplication(exclude = {SecurityAutoConfiguration.class})
+```
+lorsque tu active la sécurité, une page de sécurité par défaut.</br>
+![img_4.png](img_4.png)
+</br> **le mot de pass** : est afficher dans le console. </br>
+**Utilisateur** : user </br>
+**2eme :** : on créer une classe : `sec.SecurityConfig`, et ajouter une fonction public `InMemoryUserDetailsManager`. </br>
+`InMemoryUserDetailsManager` : est une strategie qui permet d'indiquer a spring que les utilsateur qui on le droit d'acces aux applications sont 
+stocker au mémoire, et spécifier les utilisateur qu'on le droit d'acceder au l'application. </br>
+puis on ajoute les utilisateurs.
+```java
+User.withUsername("user1").password("1234").roles("USER").build(),
+User.withUsername("admin").password("1234").roles("USER","ADMIN").build()
+```
+ca s'apple la strategien on memory authentification. </br>
+**3eme :** ajouter la methode qui va defini tous qui est necessite l'authentification (c-a-d les pages necessite l'auth et ce qu'on pas).
+```java
+@Bean
+public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
+    return http
+            .formLogin(Customizer.withDefaults()) // la formule par défaut de spring boot sécurité.
+            .authorizeHttpRequests(ar->ar.anyRequest().authenticated()) // tous les requéte necéssite une authentification.
+            .build();
+}
+```
+**Remarque :** </br>
+`.formLogin(Customizer.withDefaults())` indiquer que l'application va utiliser la page login par défaut de sécurité. </br>
+Si tu a ton propre formulaire de login : </br>
+`.formLogin(fl->fl.loginPage("/login").permitAll())` </br>
+**4eme :** on ajoutons la fonction de hashage, et ajouter l'objet `encoder` dans la fonction `InMemoryUserDetailsManager`. </br>
+**5eme :** On ajoutons la bouton de logout (logout is already defined in Spring boot security). </br>
+```html
+<li><a class="dropdown-item" th:href="@{/logout}">logout</a></li>
+```
+```time
+Temp-remarque: end of session at 1:38:00:00 .
+```
 
