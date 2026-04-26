@@ -32,13 +32,15 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
         return http
-                .formLogin(Customizer.withDefaults()) // la formule par défaut de spring boot sécurité.
+//                .formLogin(Customizer.withDefaults()) // la formule par défaut de spring boot sécurité.
 //                .authorizeHttpRequests(ar->ar.requestMatchers("/index/**").hasRole("USER")) // tous qui est /index et ces fils necessite une authentification avec role user
 //                .authorizeHttpRequests(ar->ar.requestMatchers("/save**/**","/delete/**").hasRole("ADMIN")) // tous qui est /save et /delte et ces fils necessite une authentification avec role admin
+                .formLogin(fl->fl.loginPage("/login").permitAll())
                 .authorizeHttpRequests(ar->ar.requestMatchers("/user/**").hasRole("USER"))
                 .authorizeHttpRequests(ar->ar.requestMatchers("/admin/**").hasRole("ADMIN"))
-                .authorizeHttpRequests(ar->ar.requestMatchers("/public/**").permitAll())
+                .authorizeHttpRequests(ar->ar.requestMatchers("/public/**", "/webjars/**").permitAll())
                 .authorizeHttpRequests(ar->ar.anyRequest().authenticated()) // tous les requéte necéssite une authentification.
+                .exceptionHandling(eh->eh.accessDeniedPage("/notAuthorized"))
                 .build();
     }
 }

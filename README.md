@@ -329,7 +329,103 @@ Si tu a ton propre formulaire de login : </br>
 ```html
 <li><a class="dropdown-item" th:href="@{/logout}">logout</a></li>
 ```
-```time
-Temp-remarque: end of session at 1:38:00:00 .
+## 7 - Sécurisation d'application avec Spring Security
+Pour utiliser  la securité dans layout on ajoute cette linge dans le fichier `layout1.html`dans la balise
+`<html>`.
+```html
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+```
+et pout afficher le nom d'utilisateur dans le navbar:
+```html
+<a class="nav-link dropdown-toggle" href="#" id="navbarDropdown2" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    <span sec:authentication="name"></span>
+</a>
+```
+Pour gérer les pages inaccessible pour les utilsateurs on ajoute l'élément html dans le fichier `SecurityConfig.java`
+```java
+.exceptionHandling(eh->eh.accessDeniedPage("/notAuthorized"))
+```
+c-a-d si un utilisateur essayet de entrer une page restricted, au lie de entrer la page resstricted de browser 
+on creer notre ropre page /notAuthorized.\n
+puis on ajoute la fichier `notAuthrzed.html` dans ressources/templates.
+```html
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="layout1"
+>
+<head>
+    <meta charset="UTF-8">
+    <title>Products</title>
+</head>
+<body>
+<div class="p-3" layout:fragment="content1">
+    <h3 class="text-danger">Not Authorized</h3>
+</div>
+</body>
+</html>
+```
+et on mettre a jour le controlleur de produit
+```java
+@GetMapping("/notAuthorized")
+    public String notAuthorized() {
+        return "notAuthorized";
+    }
+```
+pour désactiver la button de supprimer pour les normales utilisateur ajouter au `products.html` :
+```html
+// in the <html>
+xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+// and add a condtion in the buttoN
+<div class="p-3" sec:authorize="hasRole('ADMIN')">
+<td sec:authorize="hasRole('ADMIN')">
+```
+Pour securiser la button supprimer utilise post et csrf (qui ajoute un champ hidden a chaque formulaire avec token valeur). <br>
+on change la methode `get` pour delete au `delete` dans `ProductController`
+```java
+@PostMapping("/admin/delete")
+```
+et changer la button de `delete` par un formulaire et pas un lien.
+```html
+<td sec:authorize="hasRole('ADMIN')">
+    <form action="post" th:action="@{/admin/delete(id=${p.id})}">
+        <button type="submit" class="btn btn-danger"></button>
+    </form>
+</td>
+```
+csrf utilise par defaut, il ajoute un champ hidden au toute les formulaires qui a la valeur d'un tokken.
+<br>
+### Creation de login personnaliser
+changer le fichier `SecurityConfig.java`
+```java
+// This
+.formLogin(Customizer.withDefaults())
+// To this
+.formLogin(fl->fl.loginPage("/login"))
+```
+et ajoute dans `ProductContoller.java`
+```java
+@GetMapping("/login")
+    public String login() {
+        return "login";
+    }
+```
+et puis créer la page html login.<br>
+puis autoriser la page par changer `SecurityConfig.java`
+```java
+.formLogin(fl->fl.loginPage("/login").permitAll()) //ajoutons permitAll()
+```
+`remarque` : ajouter aussi les webjars au permitAll pour load bootstrap
+```java
+.authorizeHttpRequests(ar->ar.requestMatchers("/public/**", "/webjars/**").permitAll())
+```
+![img_5.png](img_5.png)
+Puis on ajoute logout, on ajouter dans le controleur
+```java
+@GetMapping("/logout")
+    public String logout(HttpSession session) {
+        session.invalidate();
+        return "login";
+    }
 ```
 
